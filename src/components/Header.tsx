@@ -9,6 +9,7 @@ const Header = () => {
   const { theme, setTheme } = useTheme();
 
   const navigation = [
+    { name: 'Home', href: '/' },
     { name: 'Our eSIMs', href: '/esims' },
     { name: 'About', href: '/about' },
     { name: 'Get Help', href: '/help' },
@@ -54,11 +55,11 @@ const Header = () => {
           </Button>
 
           {/* Auth Buttons */}
-          <Button variant="ghost" className="gap-2">
+          <Button variant="ghost" className="gap-2" onClick={() => window.location.href = '/auth'}>
             <User className="h-4 w-4" />
             Sign In
           </Button>
-          <Button className="btn-hero gap-2">
+          <Button className="btn-hero gap-2" onClick={() => window.location.href = '/register'}>
             <ShoppingBag className="h-4 w-4" />
             Get Started
           </Button>
@@ -99,11 +100,11 @@ const Header = () => {
                     <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     Toggle Theme
                   </Button>
-                  <Button variant="ghost" className="justify-start gap-2">
+                  <Button variant="ghost" className="justify-start gap-2" onClick={() => window.location.href = '/auth'}>
                     <User className="h-4 w-4" />
                     Sign In
                   </Button>
-                  <Button className="btn-hero gap-2">
+                  <Button className="btn-hero gap-2" onClick={() => window.location.href = '/register'}>
                     <ShoppingBag className="h-4 w-4" />
                     Get Started
                   </Button>

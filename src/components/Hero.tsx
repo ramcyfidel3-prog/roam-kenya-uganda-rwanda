@@ -55,34 +55,74 @@ const Hero = () => {
             <div className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Where are you traveling?"
+                <select 
+                  className="pl-12 h-14 text-lg bg-card/50 backdrop-blur border border-border/50 focus:border-primary rounded-lg w-full pr-12 appearance-none cursor-pointer"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-14 text-lg bg-card/50 backdrop-blur border-border/50 focus:border-primary"
-                />
-                <Button className="absolute right-2 top-2 btn-hero h-10 px-6">
-                  Search
-                </Button>
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value) {
+                      window.location.href = `/country/${e.target.value.toLowerCase()}`;
+                    }
+                  }}
+                >
+                  <option value="">Where are you traveling?</option>
+                  <option value="KE">🇰🇪 Kenya</option>
+                  <option value="TZ">🇹🇿 Tanzania</option>
+                  <option value="UG">🇺🇬 Uganda</option>
+                  <option value="RW">🇷🇼 Rwanda</option>
+                  <option value="BI">🇧🇮 Burundi</option>
+                </select>
               </div>
               <p className="text-sm text-muted-foreground">
-                Popular destinations: Kenya, Tanzania, Uganda, Rwanda
+                Select a country to view available eSIM plans
               </p>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="btn-hero text-lg px-8 py-4">
-                Get Your eSIM Now
+              <Button 
+                size="lg" 
+                className="btn-hero text-lg px-8 py-4"
+                onClick={() => window.location.href = '/register'}
+              >
+                Get Started
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="btn-hero-outline text-lg px-8 py-4 gap-3"
+                className="btn-hero-outline text-lg px-8 py-4"
+                onClick={() => window.location.href = '/contact'}
               >
-                <Play className="h-5 w-5" />
-                Watch How It Works
+                Contact Our Team
               </Button>
+            </div>
+
+            {/* Explainer Content */}
+            <div className="bg-card/30 backdrop-blur rounded-xl p-6 border border-border/50">
+              <h3 className="text-lg font-semibold mb-4">How AfriRoam Works</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div className="space-y-2">
+                  <div className="h-12 w-12 rounded-full bg-gradient-safari flex items-center justify-center mx-auto">
+                    <span className="text-white font-bold">1</span>
+                  </div>
+                  <h4 className="font-medium">Buy</h4>
+                  <p className="text-sm text-muted-foreground">Choose your destination and plan</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-12 w-12 rounded-full bg-gradient-safari flex items-center justify-center mx-auto">
+                    <span className="text-white font-bold">2</span>
+                  </div>
+                  <h4 className="font-medium">Install</h4>
+                  <p className="text-sm text-muted-foreground">Scan QR code to activate</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-12 w-12 rounded-full bg-gradient-safari flex items-center justify-center mx-auto">
+                    <span className="text-white font-bold">3</span>
+                  </div>
+                  <h4 className="font-medium">Connect</h4>
+                  <p className="text-sm text-muted-foreground">Stay connected instantly</p>
+                </div>
+              </div>
             </div>
 
             {/* Features */}
