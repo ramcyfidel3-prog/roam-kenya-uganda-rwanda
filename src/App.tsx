@@ -12,9 +12,14 @@ import Magazine from "./pages/Magazine";
 import CountryDetails from "./pages/CountryDetails";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import DashboardLayout from "./pages/DashboardLayout";
+import DashboardHome from "./pages/DashboardHome";
+import Profile from "./pages/Profile";
+import BuyAirtime from "./pages/BuyAirtime";
+import Transactions from "./pages/Transactions";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -27,15 +32,21 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/esims" element={<OurESIMs />} />
+            <Route path="/our-esims" element={<OurESIMs />} />
             <Route path="/about" element={<About />} />
             <Route path="/help" element={<Help />} />
             <Route path="/magazine" element={<Magazine />} />
             <Route path="/country/:countryCode" element={<CountryDetails />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardHome />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="buy-airtime" element={<BuyAirtime />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="support" element={<Support />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -18,7 +18,7 @@ const Auth = () => {
     // TODO: Implement actual authentication
     setTimeout(() => {
       setLoading(false);
-      navigate('/dashboard');
+      navigate('/dashboard/profile');
     }, 1000);
   };
 
