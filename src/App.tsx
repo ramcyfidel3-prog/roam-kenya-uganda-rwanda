@@ -12,6 +12,7 @@ import Magazine from "./pages/Magazine";
 import CountryDetails from "./pages/CountryDetails";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./pages/DashboardLayout";
@@ -20,6 +21,7 @@ import Profile from "./pages/Profile";
 import BuyAirtime from "./pages/BuyAirtime";
 import Transactions from "./pages/Transactions";
 import Support from "./pages/Support";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +41,9 @@ const App = () => (
             <Route path="/country/:countryCode" element={<CountryDetails />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardHome />} />
               <Route path="profile" element={<Profile />} />

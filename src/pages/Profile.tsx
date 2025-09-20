@@ -15,7 +15,8 @@ import {
   Upload,
   CheckCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 
 const Profile = () => {
@@ -239,6 +240,24 @@ const Profile = () => {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Password Management */}
+          <Card className="card-gradient">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Password & Security
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button variant="outline" className="w-full">
+                Change Password
+              </Button>
+              <Button variant="outline" className="w-full">
+                Enable Two-Factor Authentication
+              </Button>
             </CardContent>
           </Card>
 

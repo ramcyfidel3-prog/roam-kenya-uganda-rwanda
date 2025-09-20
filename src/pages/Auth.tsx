@@ -15,11 +15,19 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     
-    // TODO: Implement actual authentication
-    setTimeout(() => {
-      setLoading(false);
-      navigate('/dashboard/profile');
-    }, 1000);
+    // Check for admin credentials
+    if (email === 'admin' && password === 'admin123') {
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/admin');
+      }, 1000);
+    } else {
+      // Regular user login
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/dashboard/profile');
+      }, 1000);
+    }
   };
 
   return (
@@ -88,6 +96,12 @@ const Auth = () => {
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
+
+            <div className="mt-4 text-center">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
