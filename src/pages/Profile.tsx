@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,18 +18,24 @@ import {
   AlertCircle,
   Lock
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Profile = () => {
-  const [kycStatus, setKycStatus] = useState<'pending' | 'verified' | 'rejected'>('pending');
+  const { user, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
-    fullName: 'John Doe',
-    dateOfBirth: '1990-01-15',
-    idNumber: 'A12345678',
-    country: 'Kenya',
-    phoneNumber: '+254 700 123 456',
-    email: 'john.doe@example.com',
-    address: '123 Main Street, Nairobi'
+    fullName: '',
+    dateOfBirth: '',
+    idNumber: '',
+    country: '',
+    phoneNumber: '',
+    email: '',
+    address: ''
   });
+  const [kycFile, setKycFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [kycUploading, setKycUploading] = useState(false);
 
   const countries = [
     { code: 'KE', name: 'Kenya', currency: 'KES' },
@@ -39,14 +45,74 @@ const Profile = () => {
     { code: 'BI', name: 'Burundi', currency: 'BIF' }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Load user profile data on component mount
+  useEffect(() => {
+    if (user?.profile) {
+      setFormData({
+        fullName: user.profile.full_name || '',
+        dateOfBirth: '',
+        idNumber: user.profile.id_number || '',
+        country: user.profile.nationality || '',
+        phoneNumber: user.profile.phone_number || '',
+        email: user.email || '',
+        address: ''
+      });
+    }
+  }, [user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit KYC data
-    setKycStatus('pending');
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      await updateProfile({
+        full_name: formData.fullName,
+        id_number: formData.idNumber,
+        nationality: formData.country,
+        phone_number: formData.phoneNumber,
+      });
+      toast.success('Profile updated successfully');
+    } catch (error: any) {
+      toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKycUpload = async () => {
+    if (!kycFile || !user) return;
+    
+    setKycUploading(true);
+    try {
+      // Upload file to storage
+      const fileExt = kycFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('kyc-documents')
+        .upload(fileName, kycFile);
+
+      if (uploadError) throw uploadError;
+
+      // Create KYC submission record (using profiles table for now)
+      await updateProfile({
+        kyc_status: 'pending'
+      });
+
+      toast.success('KYC document uploaded successfully! Pending review.');
+      setKycFile(null);
+    } catch (error: any) {
+      toast.error('Failed to upload KYC document');
+    } finally {
+      setKycUploading(false);
+    }
   };
 
   const getStatusBadge = () => {
-    switch (kycStatus) {
+    const status = user?.profile?.kyc_status || 'not_submitted';
+    
+    switch (status) {
       case 'verified':
         return (
           <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
@@ -66,6 +132,13 @@ const Profile = () => {
           <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">
             <AlertCircle className="h-4 w-4 mr-1" />
             KYC Verification Failed
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+            <Upload className="h-4 w-4 mr-1" />
+            KYC Not Submitted
           </Badge>
         );
     }
@@ -99,7 +172,7 @@ const Profile = () => {
                   id="fullName"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  disabled={kycStatus === 'verified'}
+                    disabled={user?.profile?.kyc_status === 'verified'}
                 />
               </div>
 
@@ -113,7 +186,7 @@ const Profile = () => {
                     value={formData.dateOfBirth}
                     onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                     className="pl-10"
-                    disabled={kycStatus === 'verified'}
+                    disabled={user?.profile?.kyc_status === 'verified'}
                   />
                 </div>
               </div>
@@ -127,7 +200,7 @@ const Profile = () => {
                     value={formData.idNumber}
                     onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
                     className="pl-10"
-                    disabled={kycStatus === 'verified'}
+                    disabled={user?.profile?.kyc_status === 'verified'}
                   />
                 </div>
               </div>
@@ -137,7 +210,7 @@ const Profile = () => {
                 <Select 
                   value={formData.country} 
                   onValueChange={(value) => setFormData({ ...formData, country: value })}
-                  disabled={kycStatus === 'verified'}
+                  disabled={user?.profile?.kyc_status === 'verified'}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -161,7 +234,7 @@ const Profile = () => {
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     className="pl-10"
-                    disabled={kycStatus === 'verified'}
+                    disabled={user?.profile?.kyc_status === 'verified'}
                   />
                 </div>
               </div>
@@ -176,7 +249,7 @@ const Profile = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="pl-10"
-                    disabled={kycStatus === 'verified'}
+                    disabled={user?.profile?.kyc_status === 'verified'}
                   />
                 </div>
               </div>
@@ -190,14 +263,14 @@ const Profile = () => {
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="pl-10"
-                    disabled={kycStatus === 'verified'}
+                    disabled={user?.profile?.kyc_status === 'verified'}
                   />
                 </div>
               </div>
 
-              {kycStatus !== 'verified' && (
-                <Button type="submit" className="w-full btn-hero">
-                  Update Profile
+              {user?.profile?.kyc_status !== 'verified' && (
+                <Button type="submit" className="w-full btn-hero" disabled={loading}>
+                  {loading ? 'Updating...' : 'Update Profile'}
                 </Button>
               )}
             </form>
@@ -215,7 +288,7 @@ const Profile = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {kycStatus === 'verified' ? (
+            {user?.profile?.kyc_status === 'verified' ? (
                 <div className="text-center py-8">
                   <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Document Verified</h3>
@@ -229,9 +302,23 @@ const Profile = () => {
                     <p className="text-muted-foreground mb-4">
                       Upload a clear photo of your National ID or Passport
                     </p>
-                    <Button variant="outline">
-                      Choose File
-                    </Button>
+                    <div className="space-y-2">
+                      <Input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => setKycFile(e.target.files?.[0] || null)}
+                        className="mb-2"
+                      />
+                      {kycFile && (
+                        <Button 
+                          variant="outline" 
+                          onClick={handleKycUpload}
+                          disabled={kycUploading}
+                        >
+                          {kycUploading ? 'Uploading...' : 'Upload Document'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     <p>• File must be clear and readable</p>
@@ -268,7 +355,7 @@ const Profile = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {kycStatus === 'verified' ? (
+                {user?.profile?.kyc_status === 'verified' ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-green-600">
                       <CheckCircle className="h-4 w-4" />
@@ -284,11 +371,11 @@ const Profile = () => {
                     </div>
                     <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <p className="text-sm text-green-700 dark:text-green-300">
-                        <strong>AfriRoam Number:</strong> +254 700 123 456
+                        <strong>AfriRoam Number:</strong> {user?.profile?.afriroam_number || 'Not assigned yet'}
                       </p>
                     </div>
                   </div>
-                ) : kycStatus === 'pending' ? (
+                ) : user?.profile?.kyc_status === 'pending' ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-yellow-600">
                       <Clock className="h-4 w-4" />

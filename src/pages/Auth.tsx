@@ -4,29 +4,42 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Smartphone, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Check for admin credentials
-    if (email === 'admin' && password === 'admin123') {
-      setTimeout(() => {
-        setLoading(false);
-        navigate('/admin');
-      }, 1000);
-    } else {
-      // Regular user login
-      setTimeout(() => {
-        setLoading(false);
+    try {
+      // Check for admin credentials first
+      if (email === 'afriroam@gmail.com' && password === 'admin123') {
+        // Try to sign in with admin credentials
+        try {
+          await signIn(email, password);
+          navigate('/admin');
+        } catch (error: any) {
+          // If admin account doesn't exist, create it
+          console.log('Admin account not found, redirecting to manual setup');
+          toast.error('Admin account not found. Please contact system administrator.');
+        }
+      } else {
+        // Regular user login
+        await signIn(email, password);
         navigate('/dashboard/profile');
-      }, 1000);
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Failed to sign in');
+    } finally {
+      setLoading(false);
     }
   };
 

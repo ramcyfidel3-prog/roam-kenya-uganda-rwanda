@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Smartphone, Mail, Lock, User, Upload, ArrowLeft } from 'lucide-react';
+import { Smartphone, Mail, Lock, User, Phone, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,10 +13,11 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    phoneNumber: '',
   });
-  const [idFile, setIdFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -23,21 +26,33 @@ const Register = () => {
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setIdFile(e.target.files[0]);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // TODO: Implement actual registration
-    setTimeout(() => {
+    try {
+      // Validate passwords match
+      if (formData.password !== formData.confirmPassword) {
+        toast.error('Passwords do not match');
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        toast.error('Password must be at least 6 characters');
+        return;
+      }
+
+      // Register user with Supabase
+      await signUp(formData.email, formData.password, formData.fullName, formData.phoneNumber);
+      
+      toast.success('Account created successfully! Please check your email to verify your account.');
+      navigate('/dashboard/profile');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Failed to create account');
+    } finally {
       setLoading(false);
-      navigate('/dashboard');
-    }, 1000);
+    }
   };
 
   return (
@@ -135,21 +150,19 @@ const Register = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="idFile" className="text-sm font-medium">ID/Passport Document</label>
+                <label htmlFor="phoneNumber" className="text-sm font-medium">Phone Number (Optional)</label>
                 <div className="relative">
-                  <Upload className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    id="idFile"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileChange}
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
                     className="pl-10"
-                    required
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Upload a clear photo of your ID or passport for verification
-                </p>
               </div>
 
               <Button 
