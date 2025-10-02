@@ -200,9 +200,26 @@
     animation: slideIn 0.8s ease-out forwards;
   }
 
+  .animate-scale-in {
+    animation: scaleIn 0.6s ease-out forwards;
+  }
+
   .hover-lift {
     @apply transition-transform duration-300 hover:-translate-y-2;
   }
+
+  /* Stagger animations for lists */
+  .stagger-animation > * {
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  .stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
 }
 
 @layer utilities {
@@ -259,4 +276,29 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Intersection observer animation support */
+section {
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+section.animate-fade-up {
+  animation: fadeUp 0.8s ease-out forwards;
 }
