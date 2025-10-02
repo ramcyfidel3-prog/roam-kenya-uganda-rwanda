@@ -10,7 +10,7 @@ const Footer = () => {
         { name: 'Uganda eSIM', href: '/country/ug' },
         { name: 'Rwanda eSIM', href: '/country/rw' },
         { name: 'Burundi eSIM', href: '/country/bi' },
-        { name: 'East Africa Bundle', href: '/esims' },
+        { name: 'East Africa Bundle', href: '/our-esims' },
       ],
     },
     {
