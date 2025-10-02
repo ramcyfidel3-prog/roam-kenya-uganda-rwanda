@@ -36,13 +36,20 @@ const OurESIMs = () => {
 
   const fetchCountries = async () => {
     try {
+      console.log('Fetching countries from Supabase...');
       const { data, error } = await supabase
         .from('countries')
         .select('*')
         .eq('is_active', true)
         .order('name');
 
-      if (error) throw error;
+      console.log('Supabase response:', { data, error });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
       setCountries(data || []);
       setFilteredCountries(data || []);
     } catch (error) {
