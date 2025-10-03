@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Moon, Sun, Smartphone, User, ShoppingBag } from 'lucide-react';
+import { Menu, Moon, Sun, Smartphone, User, ShoppingBag, LogOut, Shield } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { user, profile, isAdmin, signOut } = useAuth();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -30,13 +41,13 @@ const Header = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           {navigation.map((item) => (
-            <a
+            <Link
               key={item.name}
-              href={item.href}
+              to={item.href}
               className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-medium"
             >
               {item.name}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -54,15 +65,67 @@ const Header = () => {
             <span className="sr-only">Toggle theme</span>
           </Button>
 
-          {/* Auth Buttons */}
-          <Button variant="ghost" className="gap-2" onClick={() => window.location.href = '/auth'}>
-            <User className="h-4 w-4" />
-            Sign In
-          </Button>
-          <Button className="btn-hero gap-2" onClick={() => window.location.href = '/register'}>
-            <ShoppingBag className="h-4 w-4" />
-            Get Started
-          </Button>
+          {/* Auth Section */}
+          {user && profile ? (
+            <>
+              <span className="text-sm text-muted-foreground">
+                Welcome, <span className="font-semibold text-primary">{profile.full_name || 'User'}</span>
+              </span>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-2">
+                    <User className="h-4 w-4" />
+                    Account
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="cursor-pointer">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="cursor-pointer">
+                      <User className="h-4 w-4 mr-2" />
+                      My Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/our-esims" className="cursor-pointer">
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      Buy eSIM
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" className="gap-2" asChild>
+                <Link to="/auth">
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Link>
+              </Button>
+              <Button className="btn-hero gap-2" asChild>
+                <Link to="/auth">
+                  <ShoppingBag className="h-4 w-4" />
+                  Get Started
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -78,14 +141,14 @@ const Header = () => {
                 {/* Mobile Navigation */}
                 <nav className="flex flex-col space-y-4">
                   {navigation.map((item) => (
-                    <a
+                    <Link
                       key={item.name}
-                      href={item.href}
+                      to={item.href}
                       className="text-lg font-medium hover:text-primary transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   ))}
                 </nav>
 
@@ -100,14 +163,55 @@ const Header = () => {
                     <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     Toggle Theme
                   </Button>
-                  <Button variant="ghost" className="justify-start gap-2" onClick={() => window.location.href = '/auth'}>
-                    <User className="h-4 w-4" />
-                    Sign In
-                  </Button>
-                  <Button className="btn-hero gap-2" onClick={() => window.location.href = '/register'}>
-                    <ShoppingBag className="h-4 w-4" />
-                    Get Started
-                  </Button>
+                  
+                  {user && profile ? (
+                    <>
+                      <div className="py-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground">Signed in as</p>
+                        <p className="font-semibold text-primary">{profile.full_name || 'User'}</p>
+                      </div>
+                      {isAdmin && (
+                        <Button variant="ghost" className="justify-start gap-2" asChild>
+                          <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                            <Shield className="h-4 w-4" />
+                            Admin Dashboard
+                          </Link>
+                        </Button>
+                      )}
+                      <Button variant="ghost" className="justify-start gap-2" asChild>
+                        <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                          <User className="h-4 w-4" />
+                          My Dashboard
+                        </Link>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start gap-2 text-destructive" 
+                        onClick={() => {
+                          signOut();
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" className="justify-start gap-2" asChild>
+                        <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                          <User className="h-4 w-4" />
+                          Sign In
+                        </Link>
+                      </Button>
+                      <Button className="btn-hero gap-2" asChild>
+                        <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                          <ShoppingBag className="h-4 w-4" />
+                          Get Started
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>
